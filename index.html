@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced QR Code Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .qr-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .qr-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+    .design-option {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      margin: 0 5px;
+      display: inline-block;
+    }
+    .selected {
+      border-color: black;
+    }
+  </style>
+</head>
+<body class="container py-5">
+  <h2 class="text-center">QR Code Generator</h2>
+
+  <div class="row mt-5">
+    <div class="col-md-6 offset-md-3">
+      <input type="text" id="qrText" class="form-control mb-3" placeholder="Enter text or URL">
+      
+      <div class="text-center mb-3">
+        <strong>Select Style:</strong><br>
+        <span class="design-option bg-dark" data-style="black"></span>
+        <span class="design-option" style="background: linear-gradient(to right, red, yellow);" data-style="gradient1"></span>
+        <span class="design-option" style="background: linear-gradient(to right, purple, cyan);" data-style="gradient2"></span>
+      </div>
+
+      <div class="text-center mb-3">
+        <label for="logoUpload">Upload Logo:</label>
+        <input type="file" id="logoUpload" accept="image/*">
+      </div>
+<div class="text-center mb-3">
+  <strong>Or pick a custom color:</strong><br>
+  <input type="color" id="customColor" value="#000000">
+</div>
+
+      <div class="text-center">
+        <button class="btn btn-success" onclick="generateQRCode()">Generate QR</button>
+        <button class="btn btn-secondary" onclick="downloadQRCode()">Download</button>
+      </div>
+
+      <div class="text-center mt-4 qr-wrapper" id="qr-container"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- <script>
+    let selectedStyle = "black";
+    let logoDataURL = null;
+
+    document.querySelectorAll(".design-option").forEach(el => {
+      el.addEventListener("click", function () {
+        document.querySelectorAll(".design-option").forEach(opt => opt.classList.remove("selected"));
+        this.classList.add("selected");
+        selectedStyle = this.dataset.style;
+      });
+    });
+
+    document.getElementById("logoUpload").addEventListener("change", function () {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        logoDataURL = e.target.result;
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+
+    function getGradientColor(ctx, size) {
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      if (selectedStyle === "gradient1") {
+        gradient.addColorStop(0, "red");
+        gradient.addColorStop(1, "yellow");
+      } else if (selectedStyle === "gradient2") {
+        gradient.addColorStop(0, "purple");
+        gradient.addColorStop(1, "cyan");
+      } else {
+        gradient.addColorStop(0, "#000");
+        gradient.addColorStop(1, "#000");
+      }
+      return gradient;
+    }
+
+    function generateQRCode() {
+      const container = document.getElementById("qr-container");
+      container.innerHTML = "";
+
+      const qrText = document.getElementById("qrText").value;
+      const qr = qrcode(0, "H");
+      qr.addData(qrText);
+      qr.make();
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const tileSize = 10;
+      const size = qr.getModuleCount() * tileSize;
+      canvas.width = canvas.height = size;
+
+      const color = getGradientColor(ctx, size);
+
+      for (let row = 0; row < qr.getModuleCount(); row++) {
+        for (let col = 0; col < qr.getModuleCount(); col++) {
+          ctx.fillStyle = qr.isDark(row, col) ? color : "#fff";
+          ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
+        }
+      }
+
+      container.appendChild(canvas);
+
+      if (logoDataURL) {
+        const logo = document.createElement("img");
+        logo.src = logoDataURL;
+        logo.className = "qr-logo";
+        container.appendChild(logo);
+      }
+    }
+
+    function downloadQRCode() {
+      const container = document.getElementById("qr-container");
+      if (!container.querySelector("canvas")) {
+        return alert("Generate QR Code.");
+      }
+
+      html2canvas(container).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "qr-code.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+  </script> -->
+  <script>
+  let selectedStyle = "black";
+  let logoDataURL = null;
+  let customColor = "#000000";
+
+  document.getElementById("customColor").addEventListener("change", function () {
+    customColor = this.value;
+    selectedStyle = "custom";
+    document.querySelectorAll(".design-option").forEach(opt => opt.classList.remove("selected"));
+  });
+
+  document.querySelectorAll(".design-option").forEach(el => {
+    el.addEventListener("click", function () {
+      document.querySelectorAll(".design-option").forEach(opt => opt.classList.remove("selected"));
+      this.classList.add("selected");
+      selectedStyle = this.dataset.style;
+      customColor = ""; // Reset custom color on preset select
+    });
+  });
+
+  function getGradientColor(ctx, size) {
+    if (selectedStyle === "custom" && customColor) {
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, customColor);
+      gradient.addColorStop(1, customColor);
+      return gradient;
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, size, size);
+    if (selectedStyle === "gradient1") {
+      gradient.addColorStop(0, "red");
+      gradient.addColorStop(1, "yellow");
+    } else if (selectedStyle === "gradient2") {
+      gradient.addColorStop(0, "purple");
+      gradient.addColorStop(1, "cyan");
+    } else {
+      gradient.addColorStop(0, "#000");
+      gradient.addColorStop(1, "#000");
+    }
+    return gradient;
+  }
+</script>
+
+</body>
+</html>
